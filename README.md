@@ -46,12 +46,3 @@ This script will create two new folders:
 2. `html` contains the html files in two version (before and after preprocessing them for the conversion).
 
 The HTML-files can helpful, for manually sanity checking.
-
-
-
-
-
-
-
-
-
