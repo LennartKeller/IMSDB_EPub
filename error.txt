@@ -151,3 +151,6 @@ https://imsdb.com/Movie Scripts/Village, The Script.html: Error retrieving scrip
 https://imsdb.com/Movie Scripts/What About Bob? Script.html: 404 Client Error: Not Found for url: https://imsdb.com/Movie%20Scripts/What%20About%20Bob?%20Script.html
 https://imsdb.com/Movie Scripts/When Harry Met Sally Script.html: Error retrieving script from https://imsdb.com/scripts/When-Harry-Met-Sally.pdf: 404 Client Error: Not Found for url: https://imsdb.com/scripts/When-Harry-Met-Sally.pdf
 https://imsdb.com/Movie Scripts/Who Framed Roger Rabbit? Script.html: 404 Client Error: Not Found for url: https://imsdb.com/Movie%20Scripts/Who%20Framed%20Roger%20Rabbit?%20Script.html
+Error saving poster for Human Nature: Invalid URL '/posters/Human-Nature.jpg': No scheme supplied. Perhaps you meant https:///posters/Human-Nature.jpg?
+Error saving poster for Verdict, The: Invalid URL '/posters/Verdict,-The.jpg': No scheme supplied. Perhaps you meant https:///posters/Verdict,-The.jpg?
+Error saving poster for Walk to Remember, A: HTTPSConnectionPool(host='images.art.com', port=443): Max retries exceeded with url: /images/products/THUMB/10126000/10126471.jpg (Caused by SSLError(CertificateError("hostname 'images.art.com' doesn't match either of 'a248.e.akamai.net', '*.akamaized.net', '*.akamaized-staging.net', '*.akamaihd.net', '*.akamaihd-staging.net'")))

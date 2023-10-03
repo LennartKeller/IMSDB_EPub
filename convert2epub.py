@@ -1,13 +1,13 @@
-from io import BytesIO, StringIO
 import re
 import subprocess
-from bs4 import BeautifulSoup
-import lxml
-from typing import Union
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-import lxml.etree as et
+from typing import List, Union, Optional
+
 import html2markdown
+import lxml.etree as et
+from bs4 import BeautifulSoup
 
 PREPROCESS_XSLT = """
 <?xml version="1.0" encoding="UTF-8"?>
@@ -30,6 +30,31 @@ PREPROCESS_XSLT = """
 
 </xsl:stylesheet>
 """.strip()
+
+
+@dataclass
+class EPubMetadata:
+    
+    title: str
+    authors: Optional[List[str]] = None
+    pubdate: Optional[str] = None
+    cover: Optional[Union[Path, str]] = None
+    language: str = "en"
+    tags: Optional[List[str]] = None
+    
+
+    def to_cli_args(self) -> List[str]:
+        cli_args = []
+        for field, val in asdict(self).items():
+            if val is None:
+                continue
+            if field == "authors":
+                val = "&".join(val)
+            if field == "tags":
+                val = ", ".join(val)
+            cli_args.extend([f"--{field}", val])
+        return cli_args
+
 
 class ConversionError(Exception):
     ...
@@ -142,7 +167,7 @@ def preprocess_html(html: str) -> str:
     html = md2html(markdown)
     return html
 
-def convert(html: str, out_file: Union[str, Path]) -> None:
+def convert(html: str, out_file: Union[str, Path], metadata: Optional[EPubMetadata] = None) -> None:
     out_file = Path(out_file)
     if out_file.suffix != ".epub":
         out_file.rename(out_file.with_suffix(".epub"))
@@ -151,11 +176,16 @@ def convert(html: str, out_file: Union[str, Path]) -> None:
         src_file.write(html)
         src_file.seek(0)
         try:
-            _ = subprocess.run([
+            args = [
                 "ebook-convert",
                 src_file.name,
                 out_file.absolute()
-                ],
+            ]
+            if metadata is not None:
+                metadata_args = metadata.to_cli_args()
+            args += metadata_args
+            _ = subprocess.run(
+                args=args,
                 check=True,
                 capture_output=True
             )
@@ -164,9 +194,12 @@ def convert(html: str, out_file: Union[str, Path]) -> None:
 
 if __name__ == "__main__":
     import json
-    from tqdm.auto import tqdm
     import logging
+
+    from tqdm.auto import tqdm
     logger = logging.getLogger()
+
+    POSTER_DIR = Path("poster")
     
     EPUB_DIR = Path("epub")
     EPUB_DIR.mkdir(exist_ok=True)
@@ -180,15 +213,42 @@ if __name__ == "__main__":
         if line.strip()
     ]
     pbar = tqdm(list(sorted(data, key=lambda s: s.get("title"))))
+
+    if POSTER_DIR is not None:
+        poster_files = list(POSTER_DIR.glob("*.jpg"))
+    
+        def find_poster(title: str) -> str:
+            title = "_".join(title.split())
+            for file in poster_files:
+                if file.stem == title:
+                    return file.absolute()
+
     for script in pbar:
         title = " ".join(script["title"].split())
         html = script["script"]
+
+        
+        if POSTER_DIR.exists():
+            poster_file = find_poster(title)
+
+        metadata = EPubMetadata(
+            title=title,
+            authors=script.get("writers"),
+            pubdate=script.get("script_date"),
+            cover=poster_file,
+            tags=script.get("genres")
+        )
+        
         (HTML_DIR / f"BEFORE_{title}.html").write_text(html)
         pbar.set_description(f"Processing {title}")
         try:
             preprocessed_html = preprocess_html(html=html)
             (HTML_DIR / f"{title}.html").write_text(preprocessed_html)
             
-            convert(preprocessed_html, out_file=EPUB_DIR / f"{title}.epub")
+            convert(
+                html=preprocessed_html,
+                out_file=EPUB_DIR / f"{title}.epub",
+                metadata=metadata
+                )
         except Exception as e:
             logger.exception(e)
