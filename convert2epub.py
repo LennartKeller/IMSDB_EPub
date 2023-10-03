@@ -54,7 +54,7 @@ class EPubMetadata:
     language: str = "en"
     tags: Optional[List[str]] = None
 
-    book_producer: str = "https://github.com/LennartKeller/IMSDB_EPub/tree/main"
+    book_producer: str = "https://github.com/LennartKeller/IMSDB_EPub"
 
     def __post_init__(self):
         if self.tags is not None:
