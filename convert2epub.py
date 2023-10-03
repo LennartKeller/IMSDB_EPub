@@ -5,8 +5,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List, Optional, Union
 
-import html2markdown
-import lxml.etree as et
 from bs4 import BeautifulSoup
 
 PREPROCESS_XSLT = """
@@ -192,8 +190,6 @@ def preprocess_html(html: str) -> str:
             paragraphs.append(f"<p>{p}</p>")
 
     html = "\n\n".join(paragraphs)
-    markdown = html2markdown.convert(html)
-    html = md2html(markdown)
 
     # Remove tags
     html = html.replace("\n", "<br/>")
