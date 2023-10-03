@@ -1,3 +1,5 @@
+epub/
+html/
 *.jsonl
 *.epub
 *.jpg
