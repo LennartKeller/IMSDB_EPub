@@ -15,11 +15,9 @@ The conversion script was sketched together in roughly 30 minutes...
 
 Hence, the quality of the resulting EPubs varies drastically ranging from perfectly enjoyable over somewhat readable to being utter junk.
 
-A notable portions of the scripts fail entirely to build.
+A notable portion of the scripts entirely fails to build.
 
 ### Usage
-
-
 
 First, install the (few) Python requirements with:
 
