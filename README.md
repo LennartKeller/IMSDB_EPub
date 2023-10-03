@@ -11,9 +11,11 @@ The EPub creation is largely done via `calibre's` `ebook-convert` CLI-tool, so m
 
 ### WIP
 
-Currently, the quality of the resulting EPubs varies drastically ranging from perfectly enjoyable over somewhat readable to being total junk.
+The conversion script was sketched together in roughly 30 minutes...
 
-Some ebooks entirely fail to build.
+Hence, the quality of the resulting EPubs varies drastically ranging from perfectly enjoyable over somewhat readable to being utter junk.
+
+A notable portions of the scripts fail entirely to build.
 
 ### Usage
 
@@ -45,4 +47,4 @@ This script will create two new folders:
 1. `epub` contains the EPub files.
 2. `html` contains the html files in two version (before and after preprocessing them for the conversion).
 
-The HTML-files can helpful, for manually sanity checking.
+The HTML-files can be helpful, for manually sanity checking.
