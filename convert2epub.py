@@ -1,9 +1,9 @@
 import re
 import subprocess
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import html2markdown
 import lxml.etree as et
@@ -35,7 +35,9 @@ HTML_TEMPLATE = """
 <html>
 <head>
     <style>
-        body {{ white-space: pre-wrap; font-family: "Courier New", monospace; }}
+        <!-- For more faithful indentation: -->
+        <!--body {{ white-space: pre-line; font-family: "Courier New", monospace; }}-->
+        body {{ white-space: pre-line; font-family: "Courier New", monospace; }}
         p {{ margin: 0; }}
     </style>
 </head>
@@ -44,9 +46,11 @@ HTML_TEMPLATE = """
 </body>
 </html>
 """.strip()
+
+
 @dataclass
 class EPubMetadata:
-    
+
     title: str
     authors: Optional[List[str]] = None
     pubdate: Optional[str] = None
@@ -59,7 +63,6 @@ class EPubMetadata:
     def __post_init__(self):
         if self.tags is not None:
             self.tags = ["movie-script"] + self.tags
-    
 
     def to_cli_args(self) -> List[str]:
         cli_args = []
@@ -79,8 +82,10 @@ class EPubMetadata:
 class ConversionError(Exception):
     ...
 
+
 class XSLTError(Exception):
     ...
+
 
 def sanitize_html(html: str) -> str:
     # Replace spooky newlines
@@ -89,10 +94,11 @@ def sanitize_html(html: str) -> str:
     soup = BeautifulSoup(html, features="html5lib")
     # Replace empty elements with br tags
     for e in soup.find_all():
-        if len(e.get_text(strip=True)) == 0:     
+        if len(e.get_text(strip=True)) == 0:
             e.replaceWith("<br>")
     html = soup.prettify(formatter=lambda string: string)
     return html
+
 
 def markdown2html(text: str) -> str:
     with NamedTemporaryFile("w", suffix=".md") as in_file:
@@ -106,7 +112,7 @@ def markdown2html(text: str) -> str:
                     in_file.name,
                     "--output",
                     out_file.name
-                    ],
+                ],
                     check=True,
                     capture_output=True
                 )
@@ -114,6 +120,7 @@ def markdown2html(text: str) -> str:
                 raise ConversionError(e.stderr.decode("utf-8"))
             html = out_file.read()
     return html
+
 
 def md2html(markdown: str) -> str:
     with NamedTemporaryFile("w", suffix=".md") as in_file:
@@ -127,7 +134,7 @@ def md2html(markdown: str) -> str:
                     in_file.name,
                     "-o",
                     out_file.name
-                    ],
+                ],
                     check=True,
                     capture_output=True
                 )
@@ -138,19 +145,19 @@ def md2html(markdown: str) -> str:
 
 # def preprocess_html(html: str) -> str:
 #     # Insert div to make paragraphs explicit
-#     html = sanitize_html(html)    
-    
+#     html = sanitize_html(html)
+
 #     paragraphs = []
 #     for p in re.split(r"\n{2,}", html.strip()):
 #         if not "".join(p.split()):
 #             continue
 #         if p.strip() == "<pre>" or p == "</pre>".strip():
 #             paragraphs.append(p)
-            
+
 #         else:
 #             paragraphs.append(f"<p>{p}<p>")
 #     html = "\n\n".join(paragraphs)
-    
+
 #     # html = html.replace("<pre>", "")
 #     # html = html.replace("</pre>", "")
 #     # html = html.replace("<html>", "")
@@ -159,7 +166,7 @@ def md2html(markdown: str) -> str:
 #     # html = html.replace("/head>", "")
 #     # html = html.replace("<body>", "")
 #     # html = html.replace("</body>", "")
-    
+
 #     # try:
 #     #     transform = et.XSLT(et.parse(BytesIO(PREPROCESS_XSLT.encode("utf-8"))))
 #     #     tree = et.parse(StringIO(html), parser=et.HTMLParser(recover=True))
@@ -170,6 +177,7 @@ def md2html(markdown: str) -> str:
 #     # html = markdown2html(html)
 #     return html
 
+
 def preprocess_html(html: str) -> str:
     html = re.sub("<script>.+</script>", "", html, flags=re.DOTALL)
     html = sanitize_html(html)
@@ -179,13 +187,14 @@ def preprocess_html(html: str) -> str:
             continue
         if p.strip() == "<pre>" or p == "</pre>".strip():
             paragraphs.append(p)
-            
+
         else:
-            paragraphs.append(f"<p>{p}<p>")
+            paragraphs.append(f"<p>{p}</p>")
+
     html = "\n\n".join(paragraphs)
     markdown = html2markdown.convert(html)
     html = md2html(markdown)
-    
+
     # Remove tags
     html = html.replace("\n", "<br/>")
     html = html.replace("<pre>", "")
@@ -200,6 +209,7 @@ def preprocess_html(html: str) -> str:
     # Insert content into standardized template
     html = HTML_TEMPLATE.format(html)
     return html
+
 
 def convert(html: str, out_file: Union[str, Path], metadata: Optional[EPubMetadata] = None) -> None:
     out_file = Path(out_file)
@@ -226,6 +236,7 @@ def convert(html: str, out_file: Union[str, Path], metadata: Optional[EPubMetada
         except subprocess.CalledProcessError as e:
             raise ConversionError(e.stderr.decode("utf-8"))
 
+
 if __name__ == "__main__":
     import json
     import logging
@@ -234,13 +245,13 @@ if __name__ == "__main__":
     logger = logging.getLogger()
 
     POSTER_DIR = Path("poster")
-    
+
     EPUB_DIR = Path("epub")
     EPUB_DIR.mkdir(exist_ok=True)
-    
+
     HTML_DIR = Path("html")
     HTML_DIR.mkdir(exist_ok=True)
-    
+
     data = [
         json.loads(line)
         for line in Path("data_html.jsonl").read_text().split("\n")
@@ -250,7 +261,7 @@ if __name__ == "__main__":
 
     if POSTER_DIR.exists():
         poster_files = list(POSTER_DIR.glob("*.jpg"))
-    
+
         def find_poster(title: str) -> str:
             title = "_".join(title.split())
             for file in poster_files:
@@ -261,7 +272,6 @@ if __name__ == "__main__":
         title = " ".join(script["title"].split())
         html = script["script"]
 
-        
         if POSTER_DIR.exists():
             poster_file = find_poster(title)
 
@@ -278,11 +288,11 @@ if __name__ == "__main__":
         try:
             preprocessed_html = preprocess_html(html=html)
             (HTML_DIR / f"{title}.html").write_text(preprocessed_html)
-            
+
             convert(
                 html=preprocessed_html,
                 out_file=EPUB_DIR / f"{title}.epub",
                 metadata=metadata
-                )
+            )
         except Exception as e:
             logger.exception(e)
