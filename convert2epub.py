@@ -248,7 +248,7 @@ if __name__ == "__main__":
     ]
     pbar = tqdm(list(sorted(data, key=lambda s: s.get("title"))))
 
-    if POSTER_DIR is not None:
+    if POSTER_DIR.exists():
         poster_files = list(POSTER_DIR.glob("*.jpg"))
     
         def find_poster(title: str) -> str:
