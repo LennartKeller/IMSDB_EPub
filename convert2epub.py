@@ -31,7 +31,19 @@ PREPROCESS_XSLT = """
 </xsl:stylesheet>
 """.strip()
 
-
+HTML_TEMPLATE = """
+<html>
+<head>
+    <style>
+        body {{ white-space: pre-wrap; font-family: "Courier New", monospace; }}
+        p {{ margin: 0; }}
+    </style>
+</head>
+<body>
+{}
+</body>
+</html>
+""".strip()
 @dataclass
 class EPubMetadata:
     
@@ -41,6 +53,8 @@ class EPubMetadata:
     cover: Optional[Union[Path, str]] = None
     language: str = "en"
     tags: Optional[List[str]] = None
+
+    book_producer: str = "https://github.com/LennartKeller/IMSDB_EPub/tree/main"
 
     def __post_init__(self):
         if self.tags is not None:
@@ -52,6 +66,8 @@ class EPubMetadata:
         for field, val in asdict(self).items():
             if val is None:
                 continue
+            if "_" in field:
+                field = field.replace("_", "-")
             if field == "authors":
                 val = "&".join(val)
             if field == "tags":
@@ -169,6 +185,20 @@ def preprocess_html(html: str) -> str:
     html = "\n\n".join(paragraphs)
     markdown = html2markdown.convert(html)
     html = md2html(markdown)
+    
+    # Remove tags
+    html = html.replace("\n", "<br/>")
+    html = html.replace("<pre>", "")
+    html = html.replace("</pre>", "")
+    html = html.replace("</pre>", "")
+    html = html.replace("<html>", "")
+    html = html.replace("</html>", "")
+    html = html.replace("<head>", "")
+    html = html.replace("/head>", "")
+    html = html.replace("<body>", "")
+    html = html.replace("</body>", "")
+    # Insert content into standardized template
+    html = HTML_TEMPLATE.format(html)
     return html
 
 def convert(html: str, out_file: Union[str, Path], metadata: Optional[EPubMetadata] = None) -> None:
