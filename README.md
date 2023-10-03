@@ -11,12 +11,9 @@ The EPub creation is largely done via `calibre's` `ebook-convert` CLI-tool, so m
 
 ### WIP
 
-The conversion script was sketched together in roughly 30 minutes...
+The conversion script was sketched together in roughly 30 minutes, and the source material is basically whitespace-formatted plaintext.
 
 Hence, the quality of the resulting EPubs varies drastically ranging from perfectly enjoyable over somewhat readable to being utter junk.
-
-A notable portion of the scripts entirely fails to build.
-
 ### Usage
 
 First, install the (few) Python requirements with:
