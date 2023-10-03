@@ -41,6 +41,10 @@ class EPubMetadata:
     cover: Optional[Union[Path, str]] = None
     language: str = "en"
     tags: Optional[List[str]] = None
+
+    def __post_init__(self):
+        if self.tags is not None:
+            self.tags = ["movie-script"] + self.tags
     
 
     def to_cli_args(self) -> List[str]:
@@ -238,7 +242,7 @@ if __name__ == "__main__":
             cover=poster_file,
             tags=script.get("genres")
         )
-        
+
         (HTML_DIR / f"BEFORE_{title}.html").write_text(html)
         pbar.set_description(f"Processing {title}")
         try:
