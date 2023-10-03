@@ -46,3 +46,8 @@ This script will create two new folders:
 2. `html` contains the html files in two version (before and after preprocessing them for the conversion).
 
 The HTML-files can be helpful, for manually sanity checking.
+
+#### Adding movie posters as covers
+
+By executing the `download_posters.py` script, available posters will be downloaded and saved and the `poster` directory.
+The EPub-conversion checks automatically if this directory is available and will use the posters as book cover whenever possible.
